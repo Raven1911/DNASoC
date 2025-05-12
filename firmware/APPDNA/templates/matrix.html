@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DNA Matrix</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .highlight {
+            background-color: lightblue;
+        }
+        .matrix-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .matrix-header h2 {
+            margin: 0;
+        }
+        .reset-button {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .sw-result {
+            border: 2px solid #4CAF50;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            margin-top: 20px;
+        }
+        .sw-result h3 {
+            color: #4CAF50;
+            margin: 0 0 10px 0;
+        }
+        .sw-alignment table {
+            margin: 10px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        .sw-alignment th, .sw-alignment td {
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+        .sw-alignment th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .meaning {
+            font-style: italic;
+            color: #666;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-left: 4px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>DNA Matrix</h1>
+    <p><strong>DNA Read (Horizontal):</strong> {{ dna_read }}</p>
+    <p><strong>DNA Reference (Vertical):</strong> {{ dna_reference }}</p>
+    <p><strong>Bits Received:</strong> {{ bits }}</p>
+
+    <div class="matrix-header">
+        <h2>Matrix</h2>
+        <form method="POST" action="/matrix">
+            <input type="hidden" name="action" value="reset">
+            <input type="submit" value="Reset Matrix" class="reset-button">
+        </form>
+    </div>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% else %}
+        <table>
+            <tr>
+                <th>0</th>
+                <th>0</th>
+                {% for char in dna_read %}
+                    <th>{{ char }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>0</th>
+                <th>0</th>
+                {% for j in range(dna_read|length) %}
+                    <td>0</td>
+                {% endfor %}
+            </tr>
+            {% for i in range(dna_reference|length) %}
+                <tr>
+                    <th>{{ dna_reference[i] }}</th>
+                    <th>0</th>
+                    {% for j in range(dna_read|length) %}
+                        <td {% if matrix[i][j] != 0 %}class="highlight"{% endif %}>{{ matrix[i][j] }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    {% if sw_matrix and max_score and align_read and align_ref %}
+        <div class="sw-result">
+            <h3>Backtracking Result</h3>
+            <p><strong>Score:</strong> {{ max_score }}</p>
+            <div class="sw-alignment">
+                <table>
+                    <tr>
+                        <th>DNA Read</th>
+                        <th>Match</th>
+                        <th>DNA Reference</th>
+                    </tr>
+                    <tr>
+                        <td>{{ align_read }}</td>
+                        <td>{{ align_result.split()[1] }}</td>
+                        <td>{{ align_ref }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="meaning">
+            <p><strong>Ý nghĩa:</strong> Quá trình backtracking được sử dụng để tìm chuỗi con tương đồng cao nhất giữa hai chuỗi DNA (DNA Read và DNA Reference) dựa trên ma trận điểm số đã cung cấp. Nó bắt đầu từ vị trí có điểm số cao nhất (ở đây là {{ max_score }}) và lần ngược lại để xây dựng chuỗi căn chỉnh, sử dụng các ký tự '*' để biểu thị khớp, ' ' cho không khớp, và '|' cho các khoảng trống (gap). Kết quả này giúp xác định các vùng tương đồng di truyền, rất hữu ích trong phân tích sinh học và so sánh trình tự DNA.</p>
+        </div>
+    {% elif message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <form method="POST" action="/matrix">
+        <input type="hidden" name="action" value="update">
+        <label for="bits">Enter Bits:</label>
+        <input type="text" id="bits" name="bits" value="{{ enter_bits }}">
+        <input type="submit" value="Update Matrix">
+    </form>
+    <form method="POST" action="/matrix">
+        <input type="hidden" name="action" value="align">
+        <input type="submit" value="Tìm chuỗi tương đồng">
+    </form>
+    <a href="/">Back to Upload</a>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93ce68189b76b0a6',t:'MTc0Njc2NDQ1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

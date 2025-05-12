@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DNA Binary Encoding</title>
+</head>
+<body>
+    <h1>DNA Binary Encoding Results</h1>
+    {% for result in results %}
+    <h2>{{ result.filename }}</h2>
+    <ul>
+        <li>Original sequence: {{ result.encoding.original }}</li>
+        <li>Binary encoding: {{ result.encoding.binary }}</li>
+    </ul>
+    {% endfor %}
+    <p><a href="/">Back to Upload</a></p>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DNA Alignment</title>
+    <style>
+        .matrix-cell {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ccc;
+            display: inline-block;
+        }
+        .cell-1 { background-color: black; }
+        .cell-0 { background-color: white; }
+    </style>
+</head>
+<body>
+    <h2>DNA Sequence Alignment</h2>
+    <form id="uploadForm">
+        <div>
+            <label>Target DNA file:</label>
+            <input type="file" name="target" required>
+        </div>
+        <div>
+            <label>Reference DNA file:</label>
+            <input type="file" name="reference" required>
+        </div>
+        <button type="submit">Process</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            displayMatrix(data.matrix);
+        };
+
+        function displayMatrix(matrix) {
+            const result = document.getElementById('result');
+            result.innerHTML = '';
+            
+            for (let row of matrix) {
+                const rowDiv = document.createElement('div');
+                for (let cell of row) {
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = `matrix-cell cell-${cell}`;
+                    rowDiv.appendChild(cellDiv);
+                }
+                result.appendChild(rowDiv);
+            }
+        }
+    </script>
+</body>
+</html>
